@@ -1,5 +1,5 @@
 {
-    "name": "nonamez/database",
+    "name": "nonamez/db",
     "description": "Simple PDO wrapper for my own use.",
     "keywords": ["PHP", "PDO", "MySQL"],
     "license": "Beerware",

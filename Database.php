@@ -4,7 +4,7 @@ namespace NoNameZ;
 
 use PDO;
 
-class Database extends PDO
+class DB extends PDO
 {
 	private static $_instance = null;
 
