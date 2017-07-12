@@ -1,0 +1,13 @@
+{
+    "name": "nonamez/database",
+    "description": "Simple PDO wrapper for my own use.",
+    "keywords": ["PHP", "PDO", "MySQL"],
+    "license": "Beerware",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Kirill",
+            "email": "hello@nonamez.name"
+        }
+    ]
+}
