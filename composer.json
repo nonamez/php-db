@@ -9,5 +9,10 @@
             "name": "Kirill",
             "email": "hello@nonamez.name"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "NoNameZ\\": "src/"
+        }
+    }
 }
