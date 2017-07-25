@@ -35,7 +35,7 @@ class DB extends PDO
 		return array_values(compact('columns', 'values'));
 	}
 
-	public function insert($table, $data) : integer
+	public function insert($table, $data) : int
 	{
 		if (count($data) == 0) {
 			return FALSE;
@@ -52,10 +52,10 @@ class DB extends PDO
 
 		$statement->execute();
 
-		return $this->lastInsertId();
+		return (int) $this->lastInsertId();
 	}
 
-	public function insertOrGetId($table, $data, $only = []) : integer
+	public function insertOrGetId($table, $data, $only = []) : int
 	{
 		if (count($data) == 0) {
 			return FALSE;
