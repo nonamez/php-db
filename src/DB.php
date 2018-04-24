@@ -6,25 +6,44 @@ use PDO;
 
 class DB extends PDO
 {
-	private static $_instance = null;
+	private static $_instances = [];
 
-	public static function getInstance(...$args) {
-		if (is_null(self::$_instance)) {
-			self::connect(...$args);
+	public static function getKey(...$args)
+	{
+		// instance name
+		if (count($args) == 1) {
+			return $args[0];
 		}
 
-		return self::$_instance;
+		// if connection data exists the last param will be instance name
+		if (array_key_exists(4, $args)) {
+			return $args[4];
+		}
+
+		return 'main';
 	}
 
-	public static function connect(...$args) {
+	public static function getInstance(...$args) : PDO {
+		$key = self::getKey(...$args);
+
+		if (array_key_exists($key, self::$_instances)) {
+			return self::$_instances[$key];
+		}
+
+		return self::connect(...$args);
+	}
+
+	public static function connect(...$args) : PDO {
+		$key = self::getKey(...$args);
+
 		$dsn = sprintf('mysql:host=%s;dbname=%s;charset=utf8', $args[0], $args[1]);
 
-		self::$_instance = new self($dsn, $args[2], $args[3], [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']);
+		self::$_instances[$key] = new self($dsn, $args[2], $args[3], [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']);
 
-		self::$_instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		self::$_instance->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+		self::$_instances[$key]->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		self::$_instances[$key]->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-		return self::$_instance;
+		return self::$_instances[$key];
 	}
 	
 	private function _getVars($data)
