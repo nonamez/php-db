@@ -54,16 +54,25 @@ class DB extends PDO
 		return array_values(compact('columns', 'values'));
 	}
 
+	// Simple clean for own purposes
+	private function cleanString($string)
+	{
+		return preg_replace('/[^a-zA-Z0-9_-]/', '', $string);
+	}
+
 	public function insert($table, $data) : int
 	{
 		if (count($data) == 0) {
 			return FALSE;
 		}
 
-		$columns = '`' . implode('`, `', array_keys($data)) . '`';
-		$values  = ':' . implode(', :', array_keys($data));
+		$keys = array_keys($data);
+		$keys = array_map([$this, 'cleanString'], $keys);
 
-		$statement = $this->prepare(sprintf('INSERT INTO `%s` (%s) VALUES (%s)', $table, $columns, $values));
+		$columns = '`' . implode('`, `', $keys) . '`';
+		$values  = ':' . implode(', :', $keys);
+
+		$statement = $this->prepare(sprintf('INSERT INTO `%s` (%s) VALUES (%s)', $this->cleanString($table), $columns, $values));
 
 		foreach ($data as $column => $value) {
 			$statement->bindValue(':' . $column, $value);
@@ -93,6 +102,8 @@ class DB extends PDO
 		$where_and = [];
 
 		foreach ($_data as $key => $value) {
+			$key = $this->cleanString($key);
+
 			$where_and[] = sprintf('`%s` = :%s', $key, $key);
 		}
 
@@ -117,5 +128,41 @@ class DB extends PDO
 		} else {
 			return $this->insert($table, $data);
 		}
+	}
+
+	public function fetchOneAsObject($table, $params = [], $columns = [])
+	{
+		if (count($columns) > 0) {
+			$columns = array_map([$this, 'cleanString'], $columns);
+			$columns = '`' . implode('`, `', $columns) . '`';
+		} else {
+			$columns = '*';
+		}
+
+		$query = sprintf('SELECT %s FROM `%s`',  $columns, $this->cleanString($table));
+
+		if (count($params)) {
+			$query = $query . ' WHERE';
+
+			foreach ($params as $name => $param) {
+				$name = $this->cleanString($name);
+
+				$query = sprintf('%s `%s` = :%s', $query, $name, $name); 
+			}
+		}
+
+		$query = $query . ' LIMIT 1';
+
+		$statement = $this->prepare($query);
+
+		if (count($params)) {
+			foreach ($params as $name => $param) {
+				$statement->bindValue(':' . $name, $param);
+			}
+		}
+
+		$statement->execute();
+
+		return $statement->fetchObject();
 	}
 }
