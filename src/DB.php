@@ -142,13 +142,15 @@ class DB extends PDO
 		$query = sprintf('SELECT %s FROM `%s`',  $columns, $this->cleanString($table));
 
 		if (count($params)) {
-			$query = $query . ' WHERE';
+			$_params = [];
 
 			foreach ($params as $name => $param) {
 				$name = $this->cleanString($name);
 
-				$query = sprintf('%s `%s` = :%s', $query, $name, $name); 
+				$_params[] = sprintf('`%s` = :%s', $name, $name); 
 			}
+
+			$query = $query . ' WHERE ' . implode(' AND ', $_params);
 		}
 
 		$query = $query . ' LIMIT 1';
